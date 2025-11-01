@@ -1,34 +1,43 @@
 // =============================================
-// VYNAURA - MAIN SCRIPT (CLEAN VERSION)
+// VYNAURA - CLEAN MAIN SCRIPT
 // =============================================
-
+// Force scroll to top on page load
+window.onbeforeunload = function() {
+    window.scrollTo(0, 0);
+}
 console.log('VynAura - Initializing...');
 
-// IMMEDIATE FIX: Force loading screen to hide
-setTimeout(() => {
-    console.log('Force hiding loading screens...');
-    
-    const loadingScreen = document.getElementById('loadingScreen');
+// =============================================
+// LOADING SCREEN MANAGEMENT
+// =============================================
+
+function handleLoadingScreen() {
+    const loadingScreen = document.querySelector('.loading-screen');
     const modelLoading = document.getElementById('modelLoading');
     
-    if (loadingScreen) {
-        loadingScreen.classList.add('loaded');
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            console.log('Main loading screen hidden');
-        }, 500);
-    }
+    console.log('Handling loading screens...');
     
+    // Hide 3D model loading if exists
     if (modelLoading) {
         modelLoading.style.display = 'none';
-        console.log('3D model loading screen hidden');
     }
     
-    // Initialize the site
-    initializeSite();
-}, 2000);
+    // Hide main loading screen with transition
+    if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+        
+        // Remove from DOM after transition
+        setTimeout(() => {
+            loadingScreen.remove();
+            console.log('Loading screen removed');
+        }, 800);
+    }
+}
 
-// Main initialization function
+// =============================================
+// MAIN INITIALIZATION
+// =============================================
+
 function initializeSite() {
     console.log('Initializing VynAura site...');
     
@@ -39,10 +48,12 @@ function initializeSite() {
     initializeTheme();
     initializeMobileMenu();
     initializeSmoothScrolling();
-    initializeShowMoreFeatures(); // ADD THIS LINE
+    initializeShowMoreFeatures();
     initializeFormValidation();
-    initializeStarRating();
-    initializeCustomization(); // Make sure this is included too
+    initializeCustomization();
+    initializeEnhancedModel();
+    setupAddToCart();
+    improveMobileScrolling();
     
     console.log('VynAura site initialized successfully!');
 }
@@ -53,23 +64,20 @@ function initializeSite() {
 
 function initializeTheme() {
     const toggleBtn = document.querySelector('.switch');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('change', () => {
-            const currentTheme = document.body.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            document.body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
-    }
+    if (!toggleBtn) return;
+
+    toggleBtn.addEventListener('change', () => {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        document.body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
 
     // Load saved theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
-    
-    if (toggleBtn) {
-        toggleBtn.checked = savedTheme === 'dark';
-    }
+    toggleBtn.checked = savedTheme === 'dark';
 }
 
 // =============================================
@@ -81,32 +89,33 @@ function initializeMobileMenu() {
     const navLinks = document.querySelector('.nav-links');
     const navOverlay = document.querySelector('.nav-overlay');
 
-    if (menuToggle && navLinks) {
-        menuToggle.addEventListener('click', () => {
-            const isExpanded = menuToggle.classList.toggle('active');
-            navLinks.classList.toggle('active');
-            navOverlay.classList.toggle('active');
-            menuToggle.setAttribute('aria-expanded', isExpanded);
-        });
+    if (!menuToggle || !navLinks || !navOverlay) return;
 
-        // Close menu when clicking overlay
-        navOverlay.addEventListener('click', () => {
-            navLinks.classList.remove('active');
-            menuToggle.classList.remove('active');
-            navOverlay.classList.remove('active');
-            menuToggle.setAttribute('aria-expanded', 'false');
-        });
+    menuToggle.addEventListener('click', () => {
+        const isExpanded = menuToggle.classList.toggle('active');
+        navLinks.classList.toggle('active');
+        navOverlay.classList.toggle('active');
+        menuToggle.setAttribute('aria-expanded', isExpanded);
+    });
 
-        // Close menu when clicking links
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-                menuToggle.classList.remove('active');
-                navOverlay.classList.remove('active');
-                menuToggle.setAttribute('aria-expanded', 'false');
-            });
+    // Close menu when clicking overlay
+    navOverlay.addEventListener('click', () => {
+        closeMobileMenu(menuToggle, navLinks, navOverlay);
+    });
+
+    // Close menu when clicking links
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            closeMobileMenu(menuToggle, navLinks, navOverlay);
         });
-    }
+    });
+}
+
+function closeMobileMenu(menuToggle, navLinks, navOverlay) {
+    navLinks.classList.remove('active');
+    menuToggle.classList.remove('active');
+    navOverlay.classList.remove('active');
+    menuToggle.setAttribute('aria-expanded', 'false');
 }
 
 // =============================================
@@ -130,46 +139,9 @@ function initializeSmoothScrolling() {
         });
     });
 }
-// === HERO SECTION FUNCTIONALITY ===
 
-// Interactive Text Effects
-function initializeInteractiveText() {
-    const aiText = document.querySelector('.ai-text');
-    const realityText = document.querySelector('.reality-text');
-    const modelViewer = document.querySelector('model-viewer');
-    
-    if (aiText && realityText) {
-        // AI text interaction
-        aiText.addEventListener('click', function(e) {
-            createParticles(e, 'ai');
-            if (modelViewer) {
-                modelViewer.cameraOrbit = '0deg 75deg 105%';
-            }
-        });
-        
-        // Reality text interaction
-        realityText.addEventListener('click', function(e) {
-            createParticles(e, 'reality');
-            if (modelViewer) {
-                modelViewer.cameraOrbit = '180deg 75deg 105%';
-            }
-        });
-        
-        // Hover effects
-        [aiText, realityText].forEach(element => {
-            element.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.1)';
-                createHoverParticles(this);
-            });
-            
-            element.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-            });
-        });
-    }
-}
 // =============================================
-// SHOW MORE FEATURES FUNCTIONALITY
+// SHOW MORE FEATURES
 // =============================================
 
 function initializeShowMoreFeatures() {
@@ -188,7 +160,6 @@ function initializeShowMoreFeatures() {
         hiddenFeatures.forEach(feature => {
             if (isExpanded) {
                 feature.style.display = 'block';
-                // Add animation
                 setTimeout(() => {
                     feature.style.opacity = '1';
                     feature.style.transform = 'translateY(0)';
@@ -230,13 +201,146 @@ function initializeShowMoreFeatures() {
         feature.style.transition = 'all 0.3s ease';
     });
 }
+// Add this to your JavaScript
+function createFallingParticles() {
+    const container = document.querySelector('.hero');
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'falling-particles';
+    container.appendChild(particlesContainer);
+
+    for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Random properties
+        const size = Math.random() * 3 + 1;
+        const left = Math.random() * 100;
+        const duration = Math.random() * 10 + 10;
+        const delay = Math.random() * 5;
+        
+        particle.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            background: ${Math.random() > 0.5 ? 'rgba(74, 108, 247, 0.9)' : 'rgba(211, 193, 243, 0.9)'};
+            border-radius: 50%;
+            left: ${left}%;
+            top: -20px;
+            animation: fall ${duration}s linear ${delay}s infinite;
+        `;
+        
+        particlesContainer.appendChild(particle);
+    }
+}
+
+// Add this CSS for JavaScript solution
+const style = document.createElement('style');
+style.textContent = `
+    .falling-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        overflow: hidden;
+        border-radius: 20px;
+    }
+    
+    @keyframes fall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { transform: translateY(400px) rotate(360deg); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', createFallingParticles);
+
+// Enhanced CTA Interactive Features
+function initializeEnhancedCTA() {
+    const unlockCards = document.querySelectorAll('.unlock-card');
+    const progressFill = document.querySelector('.progress-fill');
+    const progressText = document.querySelector('.progress-text');
+    
+    let unlockedCount = 0;
+    const totalCards = unlockCards.length;
+    
+    unlockCards.forEach(card => {
+        card.addEventListener('click', function() {
+            if (this.classList.contains('locked')) {
+                // Show sign in modal or redirect
+                showSignInPrompt(this);
+            } else {
+                // Already unlocked - could show more details
+                showFeatureDetails(this);
+            }
+        });
+        
+        // Add hover effects
+        card.addEventListener('mouseenter', function() {
+            if (this.classList.contains('locked')) {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            }
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            if (this.classList.contains('locked')) {
+                this.style.transform = 'translateY(0) scale(1)';
+            }
+        });
+    });
+    
+    // Simulate unlocking when user signs in (you'll call this after login)
+    window.unlockAllFeatures = function() {
+        unlockCards.forEach(card => {
+            card.classList.remove('locked');
+            card.classList.add('unlocked');
+            
+            const badge = card.querySelector('.card-badge');
+            badge.classList.remove('locked-badge');
+            badge.classList.add('unlocked-badge');
+            badge.innerHTML = '<i class="fas fa-check"></i> Unlocked';
+        });
+        
+        progressFill.style.width = '100%';
+        progressText.textContent = '100% Unlocked - Full Access!';
+    };
+    
+    function showSignInPrompt(card) {
+        const feature = card.getAttribute('data-feature');
+        const featureNames = {
+            'design': 'Design Studio',
+            'ai': 'AI Features',
+            'safety': 'Safety Suite',
+            'pricing': 'Live Pricing'
+        };
+        
+        // You can replace this with a modal or keep the redirect
+        if(confirm(`Sign in to unlock the ${featureNames[feature]} and start customizing your VynAura glasses!`)) {
+            window.location.href = 'login.html';
+        }
+    }
+    
+    function showFeatureDetails(card) {
+        const feature = card.getAttribute('data-feature');
+        console.log(`Showing details for: ${feature}`);
+        // Implement feature detail view
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', initializeEnhancedCTA);
 // =============================================
-// STAR RATING SYSTEM
+// FORM VALIDATION & STAR RATING
 // =============================================
 
 function initializeStarRating() {
     const stars = document.querySelectorAll('.stars i');
-    if (stars.length === 0) return;
+    if (stars.length === 0) return null;
     
     let currentRating = 0;
 
@@ -262,11 +366,7 @@ function initializeStarRating() {
             if (index < rating) {
                 s.classList.remove('far');
                 s.classList.add('fas');
-                if (isHover) {
-                    s.style.transform = 'scale(1.1)';
-                } else {
-                    s.style.transform = 'scale(1)';
-                }
+                s.style.transform = isHover ? 'scale(1.1)' : 'scale(1)';
             } else {
                 s.classList.remove('fas');
                 s.classList.add('far');
@@ -275,7 +375,6 @@ function initializeStarRating() {
         });
     }
 
-    // Return public methods
     return {
         getCurrentRating: () => currentRating,
         reset: () => {
@@ -285,15 +384,12 @@ function initializeStarRating() {
     };
 }
 
-// =============================================
-// FORM VALIDATION
-// =============================================
-
 function initializeFormValidation() {
     const reviewForm = document.getElementById('reviewForm');
     if (!reviewForm) return;
 
     const starRating = initializeStarRating();
+    if (!starRating) return;
 
     reviewForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -303,13 +399,6 @@ function initializeFormValidation() {
             return;
         }
         
-        const formData = {
-            name: document.getElementById('reviewName').value,
-            profession: document.getElementById('reviewTitle').value,
-            message: document.getElementById('reviewMessage').value,
-            rating: starRating.getCurrentRating()
-        };
-
         // Show loading state
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
@@ -339,30 +428,17 @@ function showNotification(message, type = 'info') {
             <i class="fas fa-${getNotificationIcon(type)}"></i>
             <span>${message}</span>
         </div>
-        <button class="notification-close" onclick="this.parentElement.remove()">
+        <button class="notification-close">
             <i class="fas fa-times"></i>
         </button>
     `;
     
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--card-bg);
-        border: 1px solid ${getNotificationColor(type)};
-        border-left: 4px solid ${getNotificationColor(type)};
-        padding: 15px 20px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 15px;
-        max-width: 400px;
-        z-index: 10000;
-        animation: slideInRight 0.3s ease;
-    `;
-    
     document.body.appendChild(notification);
+    
+    // Close button event
+    notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.remove();
+    });
     
     // Auto remove after 5 seconds
     setTimeout(() => {
@@ -381,71 +457,67 @@ function getNotificationIcon(type) {
     };
     return icons[type] || 'info-circle';
 }
-
-function getNotificationColor(type) {
-    const colors = {
-        success: 'var(--success)',
-        error: 'var(--error)',
-        warning: 'var(--warning)',
-        info: 'var(--accent)'
-    };
-    return colors[type] || 'var(--accent)';
-}
 // =============================================
-// CUSTOMIZABLE GLASSES FUNCTIONALITY
+// CUSTOMIZABLE GLASSES - FIXED VERSION
 // =============================================
 
 function initializeCustomization() {
-    // Elements
     const glassesBases = document.querySelectorAll('.glasses-base');
     const colorOptions = document.querySelectorAll('.color-option');
     const categories = document.querySelectorAll('.category');
     const categoryContents = document.querySelectorAll('.feature-category-content');
     const featureToggles = document.querySelectorAll('.feature-toggle input');
-    const featureDots = document.querySelectorAll('.feature-dot');
     
-    // Pricing elements
-    const featuresTotalEl = document.getElementById('featuresTotal');
-    const finalPriceEl = document.getElementById('finalPrice');
-    const cartPriceEl = document.getElementById('cartPrice');
+    if (glassesBases.length === 0) return;
     
-    // State
     let currentColor = 'black';
     let selectedFeatures = new Set(['basic-ar', 'voice-control']);
     let basePrice = 499;
     
-    // Color Selection - Switch actual images
+    // Initialize - show only black glasses by default
+    glassesBases.forEach(glasses => {
+        if (glasses.getAttribute('data-color') === 'black') {
+            glasses.classList.add('active');
+        } else {
+            glasses.classList.remove('active');
+        }
+    });
+    
+    // Color Selection - FIXED
     colorOptions.forEach(option => {
         option.addEventListener('click', function() {
-            // Remove active class from all options
             colorOptions.forEach(opt => opt.classList.remove('active'));
-            // Add active class to clicked option
             this.classList.add('active');
             
-            // Get selected color
             const selectedColor = this.getAttribute('data-color');
             currentColor = selectedColor;
             
-            // Hide all glasses images
+            // Hide all glasses first
             glassesBases.forEach(glasses => {
                 glasses.classList.remove('active');
+                glasses.style.display = 'none';
+                glasses.style.opacity = '0';
             });
             
-            // Show the selected color glasses
+            // Show selected glasses
             const selectedGlasses = document.querySelector(`.glasses-base[data-color="${selectedColor}"]`);
             if (selectedGlasses) {
-                selectedGlasses.classList.add('active');
-                
-                // Add selection animation
-                selectedGlasses.style.transform = 'scale(1.1)';
+                selectedGlasses.style.display = 'block';
                 setTimeout(() => {
-                    selectedGlasses.style.transform = 'scale(1)';
-                }, 300);
+                    selectedGlasses.classList.add('active');
+                    selectedGlasses.style.opacity = '1';
+                    selectedGlasses.style.transform = 'scale(1.1)';
+                    
+                    setTimeout(() => {
+                        selectedGlasses.style.transform = 'scale(1)';
+                    }, 300);
+                }, 10);
             }
         });
     });
     
-    // Category Navigation (unchanged)
+    // Rest of the function remains the same...
+    // Category Navigation
     categories.forEach(category => {
         category.addEventListener('click', function() {
             const categoryId = this.getAttribute('data-category');
@@ -462,12 +534,11 @@ function initializeCustomization() {
         });
     });
     
-    // Feature Toggles (unchanged)
+    // Feature Toggles
     featureToggles.forEach(toggle => {
         toggle.addEventListener('change', function() {
             const featureItem = this.closest('.feature-item');
             const feature = featureItem.getAttribute('data-feature');
-            const price = parseInt(featureItem.getAttribute('data-price'));
             
             if (this.checked) {
                 selectedFeatures.add(feature);
@@ -475,30 +546,9 @@ function initializeCustomization() {
                 selectedFeatures.delete(feature);
             }
             
-            updateFeatureDots();
             updatePricing();
         });
     });
-    
-    // Feature dot click to toggle features (unchanged)
-    featureDots.forEach(dot => {
-        dot.addEventListener('click', function() {
-            const feature = this.getAttribute('data-feature');
-            const correspondingToggle = document.querySelector(`.feature-item[data-feature="${feature}"] input`);
-            
-            if (correspondingToggle) {
-                correspondingToggle.checked = !correspondingToggle.checked;
-                correspondingToggle.dispatchEvent(new Event('change'));
-            }
-        });
-    });
-    
-    function updateFeatureDots() {
-        featureDots.forEach(dot => {
-            const feature = dot.getAttribute('data-feature');
-            dot.style.display = selectedFeatures.has(feature) ? 'block' : 'none';
-        });
-    }
     
     function updatePricing() {
         let featuresTotal = 0;
@@ -513,301 +563,45 @@ function initializeCustomization() {
         
         const finalPrice = basePrice + featuresTotal;
         
-        featuresTotalEl.textContent = `$${featuresTotal}`;
-        finalPriceEl.textContent = `$${finalPrice}`;
-        cartPriceEl.textContent = finalPrice;
+        const featuresTotalEl = document.getElementById('featuresTotal');
+        const finalPriceEl = document.getElementById('finalPrice');
+        const cartPriceEl = document.getElementById('cartPrice');
         
-        finalPriceEl.style.transform = 'scale(1.1)';
-        setTimeout(() => {
-            finalPriceEl.style.transform = 'scale(1)';
-        }, 300);
+        if (featuresTotalEl) featuresTotalEl.textContent = `$${featuresTotal}`;
+        if (finalPriceEl) finalPriceEl.textContent = `$${finalPrice}`;
+        if (cartPriceEl) cartPriceEl.textContent = finalPrice;
+        
+        if (finalPriceEl) {
+            finalPriceEl.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                finalPriceEl.style.transform = 'scale(1)';
+            }, 300);
+        }
     }
     
-    // Initialize
-    updateFeatureDots();
+    // Initialize pricing
     updatePricing();
 }
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', initializeCustomization);
 // =============================================
-// SCROLL ANIMATIONS
+// 3D MODEL ENHANCEMENTS
 // =============================================
 
-const fadeElements = document.querySelectorAll('.fade-in');
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-        }
-    });
-}, observerOptions);
-
-fadeElements.forEach(element => {
-    observer.observe(element);
-});
-
-// =============================================
-// NAVBAR SCROLL EFFECT
-// =============================================
-
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    }
-}
-
-window.addEventListener('scroll', throttle(() => {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
-    }
-}, 100));
-
-// =============================================
-// ADDITIONAL STYLES
-// =============================================
-
-const additionalStyles = `
-    @keyframes slideInRight {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes ripple {
-        from { transform: scale(0); opacity: 1; }
-        to { transform: scale(4); opacity: 0; }
-    }
-    
-    .loading-spinner.small {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-top: 2px solid white;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        display: inline-block;
-        margin-right: 8px;
-    }
-    
-    .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--card-bg);
-        padding: 15px 20px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        max-width: 400px;
-        z-index: 10000;
-        animation: slideInRight 0.3s ease;
-        border-left: 4px solid var(--accent);
-    }
-    
-    .notification-success {
-        border-left-color: var(--success);
-    }
-    
-    .notification-error {
-        border-left-color: var(--error);
-    }
-    
-    .notification-warning {
-        border-left-color: var(--warning);
-    }
-`;
-
-// Inject additional styles
-const styleSheet = document.createElement('style');
-styleSheet.textContent = additionalStyles;
-document.head.appendChild(styleSheet);
-
-// =============================================
-// USER AUTHENTICATION (SIMPLIFIED)
-// =============================================
-
-function showUserStatus(user) {
-    const userStatus = document.getElementById('userStatus');
-    const userName = document.getElementById('userName');
-    
-    if (userStatus && userName) {
-        userStatus.style.display = 'flex';
-        userName.textContent = `Welcome, ${user.fullName}`;
-    }
-}
-// =============================================
-// USER AUTHENTICATION & SECTION MANAGEMENT
-// =============================================
-
-function checkUserAuth() {
-    const user = JSON.parse(localStorage.getItem('vynaura_user'));
-    const customizeSection = document.getElementById('customize');
-    const signinCta = document.getElementById('signin-cta');
-    
-    if (user) {
-        // User is logged in - show customization, hide CTA
-        if (customizeSection) {
-            customizeSection.style.display = 'block';
-        }
-        if (signinCta) {
-            signinCta.style.display = 'none';
-        }
-        console.log('User authenticated, showing customization section');
-    } else {
-        // User is not logged in - hide customization, show CTA
-        if (customizeSection) {
-            customizeSection.style.display = 'none';
-        }
-        if (signinCta) {
-            signinCta.style.display = 'block';
-        }
-    }
-}
-
-function showUserStatus(user) {
-    const userStatus = document.getElementById('userStatus');
-    const userName = document.getElementById('userName');
-    const customizeSection = document.getElementById('customize');
-    const signinCta = document.getElementById('signin-cta');
-    
-    if (userStatus && userName) {
-        userStatus.style.display = 'flex';
-        userName.textContent = `Welcome, ${user.fullName}`;
-    }
-    
-    // Show customization section and hide CTA when user logs in
-    if (customizeSection) {
-        customizeSection.style.display = 'block';
-    }
-    if (signinCta) {
-        signinCta.style.display = 'none';
-    }
-    
-    // Smooth scroll to customization section
-    setTimeout(() => {
-        if (customizeSection) {
-            customizeSection.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
-        }
-    }, 500);
-}
-
-function logout() {
-    const customizeSection = document.getElementById('customize');
-    const signinCta = document.getElementById('signin-cta');
-    
-    // Hide customization section and show CTA on logout
-    if (customizeSection) {
-        customizeSection.style.display = 'none';
-    }
-    if (signinCta) {
-        signinCta.style.display = 'block';
-    }
-    
-    localStorage.removeItem('vynaura_user');
-    window.location.href = 'index.html';
-}
-function logout() {
-    localStorage.removeItem('vynaura_user');
-    window.location.href = 'index.html';
-}
-
-// Check for logged in user on load
-document.addEventListener('DOMContentLoaded', function() {
-    const user = JSON.parse(localStorage.getItem('vynaura_user'));
-    if (user) {
-        showUserStatus(user);
-    }
-});
-
-console.log('VynAura script loaded successfully!');
-// Interactive Text Effects
-function initializeInteractiveText() {
-    const aiText = document.querySelector('.ai-text');
-    const realityText = document.querySelector('.reality-text');
-    const modelViewer = document.querySelector('model-viewer');
-    
-    if (aiText && realityText) {
-        // AI text interaction
-        aiText.addEventListener('click', function(e) {
-            createParticles(e, 'ai');
-            if (modelViewer) {
-                // Trigger AI-related animation on model
-                modelViewer.cameraOrbit = '0deg 75deg 105%';
-                modelViewer.animationName = 'ai-pulse';
-            }
-        });
-        
-        // Reality text interaction
-        realityText.addEventListener('click', function(e) {
-            createParticles(e, 'reality');
-            if (modelViewer) {
-                // Trigger reality-related animation
-                modelViewer.cameraOrbit = '180deg 75deg 105%';
-                modelViewer.animationName = 'reality-zoom';
-            }
-        });
-        
-        // Hover effects
-        [aiText, realityText].forEach(element => {
-            element.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.1)';
-                createHoverParticles(this);
-            });
-            
-            element.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-            });
-        });
-    }
-}
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', initializeInteractiveText);
-// Enhanced 3D Model Control
 function initializeEnhancedModel() {
     const modelViewer = document.querySelector('model-viewer');
-    
     if (!modelViewer) return;
     
-    // Wait for model to load
     modelViewer.addEventListener('load', () => {
         console.log('3D model loaded, applying enhanced settings...');
         
-        // Set initial camera position for better zoom
         setTimeout(() => {
-            // More zoomed-in camera settings
             modelViewer.cameraOrbit = '0deg 75deg 2.3m';
             modelViewer.fieldOfView = '25deg';
             modelViewer.cameraTarget = '0m 0.1m 0m';
-            
-            // Smooth camera transition
-            modelViewer.addEventListener('camera-change', () => {
-                // Optional: Add smooth camera behavior
-            });
         }, 1000);
     });
     
-    // Add zoom controls
     setupZoomControls(modelViewer);
+    addResetButton();
 }
 
 function setupZoomControls(modelViewer) {
@@ -815,19 +609,16 @@ function setupZoomControls(modelViewer) {
     const minScale = 0.8;
     const maxScale = 1.5;
     
-    // Mouse wheel zoom
     modelViewer.addEventListener('wheel', (event) => {
         event.preventDefault();
         
         const delta = -event.deltaY * 0.01;
         scale = Math.min(maxScale, Math.max(minScale, scale + delta));
         
-        // Adjust camera distance based on scale
         const newDistance = 2.5 / scale;
         modelViewer.cameraOrbit = `0deg 75deg ${newDistance}m`;
     });
     
-    // Touch pinch zoom
     let touchStartDistance = 0;
     
     modelViewer.addEventListener('touchstart', (event) => {
@@ -857,7 +648,6 @@ function getTouchDistance(touches) {
     return Math.sqrt(dx * dx + dy * dy);
 }
 
-// Reset camera position
 function resetCamera() {
     const modelViewer = document.querySelector('model-viewer');
     if (modelViewer) {
@@ -866,7 +656,6 @@ function resetCamera() {
     }
 }
 
-// Add reset button to interaction hints
 function addResetButton() {
     const hints = document.querySelector('.interaction-hints');
     if (hints) {
@@ -881,13 +670,8 @@ function addResetButton() {
     }
 }
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    initializeEnhancedModel();
-    addResetButton();
-});
 // =============================================
-// NON-BLOCKING CART MESSAGE FUNCTIONALITY
+// CART FUNCTIONALITY
 // =============================================
 
 function setupAddToCart() {
@@ -899,24 +683,15 @@ function setupAddToCart() {
     
     addToCartBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        
-        // Show message immediately without heavy computations
         showCartMessage(cartMessage);
-        
-        // Lightweight celebration (non-blocking)
-        setTimeout(() => {
-            addLightCelebration();
-        }, 100);
     });
     
-    // Close message
     if (closeMessageBtn) {
         closeMessageBtn.addEventListener('click', function() {
             hideCartMessage(cartMessage);
         });
     }
     
-    // Auto-hide after 5 seconds
     if (cartMessage) {
         cartMessage.addEventListener('click', function(e) {
             if (e.target === this) {
@@ -929,7 +704,6 @@ function setupAddToCart() {
 function showCartMessage(messageElement) {
     messageElement.classList.add('show');
     
-    // Auto-hide after 5 seconds
     setTimeout(() => {
         hideCartMessage(messageElement);
     }, 5000);
@@ -939,73 +713,179 @@ function hideCartMessage(messageElement) {
     messageElement.classList.remove('show');
 }
 
-// Lightweight celebration (no DOM manipulation during animation)
-function addLightCelebration() {
-    // Simple CSS-based celebration
-    const cartMessage = document.getElementById('cartMessage');
-    if (cartMessage) {
-        cartMessage.style.animation = 'celebrate 0.5s ease';
-        setTimeout(() => {
-            cartMessage.style.animation = '';
-        }, 500);
-    }
-}
+// =============================================
+// MOBILE SCROLLING IMPROVEMENTS
+// =============================================
 
-// Add celebration CSS
-const celebrationCSS = `
-@keyframes celebrate {
-    0% { transform: translateX(400px) scale(1); }
-    50% { transform: translateX(380px) scale(1.05); }
-    100% { transform: translateX(400px) scale(1); }
-}
-
-.cart-message.show {
-    transform: translateX(400px);
-    animation: slideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-}
-
-@keyframes slideIn {
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-`;
-
-// Inject styles safely
-if (document.head) {
-    const style = document.createElement('style');
-    style.textContent = celebrationCSS;
-    document.head.appendChild(style);
-}
-
-// Initialize safely after page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupAddToCart);
-} else {
-    setupAddToCart();
-}
-// Add smooth scrolling behavior for mobile
 function improveMobileScrolling() {
     const featuresList = document.querySelector('.features-list');
     
     if (featuresList && 'ontouchstart' in window) {
-        // Add touch-friendly class
         featuresList.classList.add('touch-scroll');
-        
-        // Prevent accidental body scroll when scrolling features
-        featuresList.addEventListener('touchstart', function(e) {
-            this.style.overflowY = 'auto';
-        });
-        
-        featuresList.addEventListener('touchend', function(e) {
-            // Small delay to ensure scroll completes
-            setTimeout(() => {
-                this.style.overflowY = 'auto';
-            }, 100);
-        });
     }
 }
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', improveMobileScrolling);
+// =============================================
+// SCROLL ANIMATIONS & NAVBAR EFFECTS
+// =============================================
+
+function initializeScrollAnimations() {
+    const fadeElements = document.querySelectorAll('.fade-in');
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+
+    fadeElements.forEach(element => {
+        observer.observe(element);
+    });
+}
+
+function initializeNavbarScroll() {
+    function throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        }
+    }
+
+    window.addEventListener('scroll', throttle(() => {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    }, 100));
+}
+
+// =============================================
+// USER AUTHENTICATION
+// =============================================
+function checkUserAuth() {
+    const user = JSON.parse(localStorage.getItem('vynaura_user'));
+    const customizeSection = document.getElementById('customize');
+    const signinCta = document.getElementById('signin-cta');
+    const signInBtn = document.getElementById('signInBtn');
+    const userStatus = document.getElementById('userStatus');
+    
+    if (user) {
+        // User is logged in
+        if (customizeSection) customizeSection.style.display = 'block';
+        if (signinCta) signinCta.style.display = 'none';
+        if (signInBtn) signInBtn.style.display = 'none';
+        if (userStatus) userStatus.style.display = 'flex';
+        
+        showUserStatus(user);
+    } else {
+        // User is logged out
+        if (customizeSection) customizeSection.style.display = 'none';
+        if (signinCta) signinCta.style.display = 'block';
+        if (signInBtn) signInBtn.style.display = 'flex';
+        if (userStatus) userStatus.style.display = 'none';
+    }
+}
+
+function showUserStatus(user) {
+    const userStatus = document.getElementById('userStatus');
+    const userName = document.getElementById('userName');
+    const customizeSection = document.getElementById('customize');
+    const signinCta = document.getElementById('signin-cta');
+    const signInBtn = document.getElementById('signInBtn');
+    
+    // Update user name in dropdown
+    if (userStatus && userName) {
+        userName.textContent = user.fullName || user.name;
+    }
+    
+    // Show/hide appropriate sections
+    if (customizeSection) customizeSection.style.display = 'block';
+    if (signinCta) signinCta.style.display = 'none';
+    if (signInBtn) signInBtn.style.display = 'none';
+    if (userStatus) userStatus.style.display = 'flex';
+    
+    // Smooth scroll to customization section
+    setTimeout(() => {
+        if (customizeSection) {
+            customizeSection.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+    }, 500);
+}
+
+function logout() {
+    const customizeSection = document.getElementById('customize');
+    const signinCta = document.getElementById('signin-cta');
+    const signInBtn = document.getElementById('signInBtn');
+    const userStatus = document.getElementById('userStatus');
+    
+    // Show sign in, hide user dropdown and customization
+    if (customizeSection) customizeSection.style.display = 'none';
+    if (signinCta) signinCta.style.display = 'block';
+    if (signInBtn) signInBtn.style.display = 'flex';
+    if (userStatus) userStatus.style.display = 'none';
+    
+    // Remove user data and redirect
+    localStorage.removeItem('vynaura_user');
+    window.location.href = 'index.html';
+}
+
+// Make sure to call this when page loads
+document.addEventListener('DOMContentLoaded', checkUserAuth);
+// =============================================
+// MAIN EVENT LISTENERS
+// =============================================
+
+// Single DOMContentLoaded listener
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded - checking authentication');
+    checkUserAuth();
+    initializeScrollAnimations();
+    initializeNavbarScroll();
+});
+
+// Single window load listener
+window.addEventListener('load', function() {
+    console.log('Window fully loaded');
+    handleLoadingScreen();
+    initializeSite();
+});
+
+// Fallback loading screen removal
+setTimeout(() => {
+    const loadingScreen = document.querySelector('.loading-screen');
+    if (loadingScreen && loadingScreen.parentNode) {
+        console.log('Fallback: Removing loading screen');
+        handleLoadingScreen();
+    }
+}, 3000);
+
+console.log('VynAura script loaded successfully!');
+
+const signUpButton = document.getElementById('signUp');
+const signInButton = document.getElementById('signIn');
+const container = document.getElementById('container');
+
+signUpButton.addEventListener('click', () => {
+    container.classList.add('right-panel-active');
+});
+
+signInButton.addEventListener('click', () => {
+    container.classList.remove('right-panel-active');
+});

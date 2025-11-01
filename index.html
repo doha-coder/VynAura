@@ -27,6 +27,7 @@
             <p>Loading immersive experience...</p>
         </div>
     </div>
+
     <!-- navigation bar -->
     <nav class="navbar">
         <div class="container">
@@ -38,13 +39,29 @@
                 <li><a href="#specs">Specifications</a></li>
                 <li><a href="#testimonials">Reviews</a></li>
                 <li><a href="#download">Download</a></li>
-                <li><a href="login.html" class="login-btn">Sign In</a></li>
             </ul>
 
             <div class="nav-right">
+                <a href="login.html" class="login-btn" id="signInBtn" title="Sign In">
+                    <i class="fas fa-user"></i>
+                </a>
+
+                <div class="user-status-compact" id="userStatus" style="display: none;">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-dropdown">
+                        <div class="user-info">
+                            <span id="userName">John Doe</span>
+                        </div>
+                        <button onclick="logout()" class="logout-btn">Logout</button>
+                    </div>
+                </div>
+
                 <button class="theme-toggle" aria-label="Toggle theme">
                     <input type="checkbox" name="checkbox" class="switch">
                 </button>
+
                 <button class="menu-toggle" aria-label="Toggle menu">
                     <span class="bar"></span>
                     <span class="bar"></span>
@@ -52,27 +69,20 @@
                 </button>
             </div>
         </div>
-
-        <div class="user-status" id="userStatus" style="display: none;">
-            <span id="userName"></span>
-            <button onclick="logout()" class="logout-btn">Logout</button>
-        </div>
     </nav>
-
     <div class="nav-overlay"></div>
+
+
     <!-- Hero Section with Interactive Text -->
     <section class="hero" id="home">
         <div class="hero-3d-container">
-            <div class="model-loading" id="modelLoading">
-                <div class="loading-spinner"></div>
-                <p>Loading VynAura Glasses...</p>
-            </div>
+
 
             <div class="split-screen-container">
                 <div class="model-side">
                     <model-viewer src="./rayban-glasses.glb" alt="VynAura Smart Glasses" auto-rotate camera-controls ar
-                        camera-orbit="0deg 75deg 0.8m" field-of-view="35deg" min-camera-orbit="auto auto 0.5m"
-                        max-camera-orbit="auto auto 1.2m" camera-target="0m 0.05m 0m" interaction-prompt="none"
+                        camera-orbit="0deg 75deg 0.8m" field-of-view="35deg" min-camera-orbit="auto auto 1.0m"
+                        max-camera-orbit="auto auto 1.8m" camera-target="0m 0.05m 0m" interaction-prompt="none"
                         class="glasses-model" id="glassesModel">
                     </model-viewer>
                 </div>
@@ -87,6 +97,8 @@
                 </div>
             </div>
     </section>
+
+
     <!-- Features Section with Show More -->
     <section class="features-show-more" id="features">
         <div class="container">
@@ -181,83 +193,74 @@
         </div>
     </section>
 
-    <!-- Specifications Section -->
-    <section class="specifications" id="specs">
+    <!-- Compact Sign In CTA Section -->
+    <section class="signin-cta-compact" id="signin-cta">
         <div class="container">
-            <div class="section-title">
-                <h2>Technical Specifications</h2>
-                <p>Premium hardware meets intelligent software</p>
-            </div>
-            <div class="specs-grid">
-                <div class="spec-category">
-                    <h3>Display & Optics</h3>
-                    <ul>
-                        <li>Micro OLED Display</li>
-                        <li>1080p Resolution per eye</li>
-                        <li>60Hz Refresh Rate</li>
-                        <li>Adaptive Brightness</li>
-                    </ul>
-                </div>
-                <div class="spec-category">
-                    <h3>Audio & Input</h3>
-                    <ul>
-                        <li>Bone Conduction Speakers</li>
-                        <li>Dual Beamforming Mics</li>
-                        <li>Touch-sensitive Temple</li>
-                        <li>Voice Command Support</li>
-                    </ul>
-                </div>
-                <div class="spec-category">
-                    <h3>Performance</h3>
-                    <ul>
-                        <li>Custom AI Processor</li>
-                        <li>8GB RAM + 128GB Storage</li>
-                        <li>All-day Battery Life</li>
-                        <li>5G & Wi-Fi 6 Support</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-<!-- Sign In CTA Section -->
-<section class="signin-cta" id="signin-cta">
-    <div class="container">
-        <div class="cta-content">
-            <div class="cta-text">
-                <h2>Ready to Build Your Perfect VynAura?</h2>
-                <p>Sign in to unlock our exclusive customization studio where you can:</p>
-                <ul class="cta-features">
-                    <li><i class="fas fa-palette"></i> Choose from 5 premium frame colors</li>
-                    <li><i class="fas fa-microchip"></i> Select advanced AI features</li>
-                    <li><i class="fas fa-shield-alt"></i> Add safety & emergency features</li>
-                    <li><i class="fas fa-calculator"></i> See real-time pricing updates</li>
-                    <li><i class="fas fa-shopping-cart"></i> Save your custom configuration</li>
-                </ul>
-                <div class="cta-buttons">
-                    <a href="login.html" class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt"></i> Sign In to Customize
-                    </a>
-                    <a href="#features" class="btn btn-secondary">
-                        <i class="fas fa-eye"></i> Explore Features First
-                    </a>
-                </div>
-                
-            </div>
-            <div class="cta-visual">
-                <div class="cta-preview">
-                    <img src="./gold-glasses.png" alt="Customization Preview" class="cta-preview-image">
-                    <div class="preview-overlay">
-                        <div class="preview-text">
-                            <i class="fas fa-lock"></i>
-                            <span>Sign in to unlock</span>
+            <div class="cta-compact-content">
+                <!-- Left: Quick Preview -->
+                <div class="preview-side">
+                    <div class="preview-card">
+                        <div class="preview-header">
+                            <h3>Your Custom VynAura</h3>
+                            <div class="preview-status">
+                                <i class="fas fa-lock"></i>
+                                <span>Sign in to customize</span>
+                            </div>
                         </div>
+                        <div class="preview-visual">
+                            <img src="./gold-glasses.png" alt="VynAura Smart Glasses" class="preview-image">
+                            <div class="preview-badge">
+                                <i class="fas fa-star"></i>
+                                <span>Customizable</span>
+                            </div>
+                        </div>
+                        <div class="preview-features">
+                            <div class="feature-tag">5 Colors</div>
+                            <div class="feature-tag">AI Features</div>
+                            <div class="feature-tag">Safety</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Quick Actions -->
+                <div class="actions-side">
+                    <div class="actions-header">
+                        <h2>Ready to Customize?</h2>
+                        <p>Sign in to build your perfect smart glasses</p>
+                    </div>
+
+                    <div class="quick-benefits">
+                        <div class="benefit-item">
+                            <i class="fas fa-palette"></i>
+                            <span>Choose frame colors & styles</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-microchip"></i>
+                            <span>Select AI features you need</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Add safety features</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-calculator"></i>
+                            <span>See live pricing</span>
+                        </div>
+                    </div>
+
+                    <div class="cta-buttons-compact">
+                        <a href="login.html" class="btn btn-primary-compact">
+                            <i class="fas fa-rocket"></i>
+                            Start Customizing
+                        </a>
+                        <a href="#features" class="btn-link">
+                            Explore features first →
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
     <!-- Customizable Glasses Section -->
     <section class="customize-glasses" id="customize" style="display: none;">
@@ -485,7 +488,8 @@
                 <div class="reviews-grid">
                     <div class="testimonial-card">
                         <div class="testimonial-content">
-                            <p>"These glasses changed how I communicate during business trips. The real-time translation
+                            <p>"These glasses changed how I communicate during business trips. The real-time
+                                translation
                                 is flawless!"</p>
                         </div>
                         <div class="testimonial-author">
@@ -495,7 +499,8 @@
                     </div>
                     <div class="testimonial-card">
                         <div class="testimonial-content">
-                            <p>"As someone with hearing challenges, the voice-to-text feature has been life-changing."
+                            <p>"As someone with hearing challenges, the voice-to-text feature has been
+                                life-changing."
                             </p>
                         </div>
                         <div class="testimonial-author">
@@ -505,7 +510,8 @@
                     </div>
                     <div class="testimonial-card">
                         <div class="testimonial-content">
-                            <p>"The SOS feature gives me peace of mind during my late-night walks home from work."</p>
+                            <p>"The SOS feature gives me peace of mind during my late-night walks home from work."
+                            </p>
                         </div>
                         <div class="testimonial-author">
                             <strong>Jessica Park</strong>
@@ -595,12 +601,6 @@
                             <span>+1 (000) 000-0000</span>
                         </div>
                     </div>
-                    <!-- <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    </div> -->
                 </div>
                 <div class="footer-section">
                     <h4>Product</h4>
@@ -610,7 +610,7 @@
                         <li><a href="#download">Download</a></li>
                     </ul>
                 </div>
-                <!-- <div class="footer-section">
+                <div class="footer-section">
                     <h4>Support</h4>
                     <ul>
                         <li><a href="#">Help Center</a></li>
@@ -618,23 +618,17 @@
                         <li><a href="#">Warranty</a></li>
                     </ul>
                 </div>
-                <div class="footer-section">
-                    <h4>University Project</h4>
-                    <ul>
-                        <li><a href="#">About the Project</a></li>
-                        <li><a href="#">Research Paper</a></li>
-                        <li><a href="#">Team Members</a></li>
-                    </ul>
-                </div>
-            </div> -->
-            <!-- <div class="footer-bottom">
+               
+            </div>
+                <div class="footer-bottom">
                 <p>&copy; 2026 VynAura - University Graduation Project. All rights reserved.</p>
-            </div> -->
-        </div>
+            </div>
+            </div>
     </footer>
 
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <script src="script.js"></script>
+
 </body>
 
 </html>
